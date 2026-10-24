@@ -2,11 +2,6 @@
 
 # 🔑 Chabi
 
-### A sign-in form that cuts a key.
-
-Type your password and a tiny hammer strikes one notch into the key for every character.
-Press **Sign in** and the key slides into the lock. Only the right password opens it.
-
 <a href="https://sarowarsuman.github.io/Chabi/">
   <img src="assets/live-button.svg" alt="Open live demo" width="460">
 </a>
@@ -15,6 +10,11 @@ Press **Sign in** and the key slides into the lock. Only the right password open
 ![Pure HTML CSS JS](https://img.shields.io/badge/pure-HTML%20%C2%B7%20CSS%20%C2%B7%20JS-0f172a?style=flat-square)
 ![No dependencies](https://img.shields.io/badge/dependencies-none-0f172a?style=flat-square)
 ![Just for fun](https://img.shields.io/badge/just%20for-fun-0f172a?style=flat-square)
+
+### A sign-in form that cuts a key.
+
+Type your password and a tiny hammer strikes one notch into the key for every character.
+Press **Sign in** and the key slides into the lock. Only the right password opens it.
 
 <br>
 
@@ -76,14 +76,3 @@ Chabi/
 ## 🚀 Run locally
 
 Open `index.html` in any modern browser. No build step, no dependencies.
-
-## 🌐 Deploy on GitHub Pages
-
-1. Push `index.html` and the `assets` folder to your repo.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**, pick `main` and `/ (root)`, then **Save**.
-4. After a minute it is live at `https://<your-username>.github.io/<repo-name>/`.
-
-## 🙌 Credits
-
-Inspired by a "Chabi" sign-in reel by Code Mode. The code, design and animation here are written from scratch.
