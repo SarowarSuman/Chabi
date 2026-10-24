@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070c17">
+<title>chabi — your password is the key</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--surf:#111b30;--field:#0a1222;--line:#22304a;--ink:#d5deec;--mut:#8494ad;--acc:#2dd4bf;--acc2:#14b8a6;--on:#04201c;--bad:#f87171;--ok:#4ade80}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;background:#05080f}
+
+/* ---- studio lighting: top key light, warm/teal kickers, vignette, fine grain (all static) ---- */
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+ background:
+  radial-gradient(ellipse 60% 42% at 50% -6%,rgba(125,211,252,.22),transparent 70%),
+  radial-gradient(ellipse 38% 32% at 0% 100%,rgba(251,146,60,.09),transparent 70%),
+  radial-gradient(ellipse 38% 32% at 100% 100%,rgba(45,212,191,.08),transparent 70%),
+  radial-gradient(ellipse at 50% 55%,transparent 45%,rgba(0,0,0,.62) 100%),
+  linear-gradient(180deg,#0a1220,#070c17 55%,#04070d)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.07;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+body{min-height:100dvh;display:grid;place-items:start center;font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--ink);
+ padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));overflow-x:hidden}
+.wrap{display:flex;flex-direction:column;gap:16px;width:min(100%,460px)}
+.left{display:contents}
+.live{position:sticky;top:0;z-index:10;background:#070c17;padding:6px 0 10px;box-shadow:0 12px 16px -10px #070c17}
+.brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:16px}
+.brand i{color:var(--acc);font-style:normal}
+#cap{font-size:clamp(26px,6vw,34px);line-height:1.06;letter-spacing:-.035em;font-weight:800;margin-bottom:12px;min-height:2.12em}
+#cap em{font-style:normal;color:var(--acc)}
+#cap.swap{animation:swap .45s ease}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}}
+.stage{overflow:hidden;contain:paint;border-radius:18px;border:1px solid var(--line);background:#070d1a;aspect-ratio:420/186;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.stage svg{width:100%;height:100%;display:block;transition:transform .8s cubic-bezier(.5,0,.2,1)}
+svg[data-cam=stamp]{transform:scale(2.2);transform-origin:8% 75%}
+svg[data-cam=cut]{transform:scale(1.3);transform-origin:31% 60%}
+svg[data-cam=lock]{transform:scale(1.4);transform-origin:75% 62%}
+#kt{transform-origin:140px 163px}
+#kt.lay{animation:lay 1.2s cubic-bezier(.45,0,.2,1) forwards}
+#kt.try{animation:tryit .9s ease}
+@keyframes lay{to{transform:scaleY(.14)}}
+@keyframes tryit{25%{transform:scaleY(.82)}50%{transform:scaleY(1)}75%{transform:scaleY(.82)}100%{transform:scaleY(1)}}
+#ham{transition:opacity .25s}
+#shear{transition:stroke-opacity .4s,stroke-width .4s}
+#shear.on{stroke:var(--ok);stroke-opacity:1;stroke-dasharray:none;stroke-width:3}
+#lock.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.card{background:linear-gradient(180deg,rgba(20,32,56,.88),rgba(12,20,36,.92));border:1px solid var(--line);border-radius:20px;padding:28px 26px;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(148,163,184,.10)}
+h2{font-size:28px;letter-spacing:-.025em;font-weight:800}
+.sub{color:var(--mut);font-size:15px;margin:4px 0 22px;word-break:break-word}
+.f{display:block;margin-bottom:16px}
+.f>span{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:7px}
+.box{position:relative}
+.f input[type=email],.f input[type=password],.f input[type=text]{width:100%;min-height:50px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font:500 16px Inter,sans-serif;color:var(--ink);background:var(--field);outline:0;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+.f input::placeholder{color:#4b5b78}
+.f input:focus{border-color:var(--acc);box-shadow:0 0 0 3px #2dd4bf26}
+.f.err input{border-color:var(--bad);animation:shake .35s}
+.box input{padding-right:50px!important}
+.eye{position:absolute;right:2px;top:2px;width:46px;height:46px;background:none;border:0;cursor:pointer;color:var(--mut);display:grid;place-items:center}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin:0 0 18px}
+.chk{display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;color:var(--mut)}
+.chk input{accent-color:var(--acc2);width:18px;height:18px;margin:0}
+a{color:var(--acc);font-weight:600;text-decoration:none;padding:8px 0;display:inline-block}
+.btn{width:100%;min-height:52px;padding:14px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--on);font:700 16px Inter,sans-serif;cursor:pointer;touch-action:manipulation;transition:transform .12s,filter .2s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{filter:saturate(.6) brightness(.85);cursor:progress}
+.msg{color:var(--bad);font-size:14px;font-weight:600;margin-top:14px;line-height:1.4}
+.new{text-align:center;font-size:14px;margin-top:14px;color:var(--mut)}
+.out{display:block;margin:12px auto 0;min-height:44px;padding:0 16px;background:none;border:0;font:600 14px Inter,sans-serif;color:var(--mut);cursor:pointer}
+
+.hint{text-align:center;font-size:12px;color:#55647f;margin-top:12px;letter-spacing:.01em}
+.hint b{font-weight:600;color:#6b7b97}
+/* ---- phone: caption + stage stay pinned while you type ---- */
+@media(max-width:780px){
+  body{place-items:start center;padding-top:max(14px,env(safe-area-inset-top))}
+  .wrap{display:flex;flex-direction:column;gap:14px}
+  .left{display:contents}
+  .brand{margin-bottom:0;font-size:20px}
+  .live{position:sticky;top:0;z-index:10;background:#070c17;padding:6px 0 10px;box-shadow:0 12px 16px -10px #070c17}
+  #cap{font-size:20px;min-height:2.5em;margin-bottom:8px;letter-spacing:-.02em}
+  #cap br{display:none}
+  .card{padding:22px 18px}
+  h2{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="left">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+        <rect x="1" y="1" width="28" height="28" rx="9" fill="url(#lg)"/>
+        <circle cx="15" cy="12" r="5" fill="#04201c"/>
+        <path d="M13 15h4l2 9h-8z" fill="#04201c"/>
+        <circle cx="15" cy="12" r="1.8" fill="#2dd4bf"/>
+      </svg>
+      <span>chabi<i>.</i></span>
+    </div>
+
+    <div class="live">
+      <h1 id="cap" aria-live="polite">Your password <br>is the <em>key</em>.</h1>
+      <div class="stage">
+        <svg id="sv" viewBox="0 24 420 186" data-cam="idle">
+          <defs>
+            <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#cbd5e1"/><stop offset=".55" stop-color="#94a3b8"/><stop offset="1" stop-color="#64748b"/>
+            </linearGradient>
+            <radialGradient id="spot" cx="50%" cy="0%" r="95%">
+              <stop offset="0" stop-color="#2b4a73" stop-opacity=".8"/><stop offset="1" stop-color="#070d1a" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7dd3fc" stop-opacity=".13"/><stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="bench" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#101b30"/><stop offset="1" stop-color="#04070d"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="24" width="420" height="186" fill="url(#spot)"/>
+          <polygon points="165,24 255,24 410,210 10,210" fill="url(#beam)"/>
+          <rect x="0" y="198" width="420" height="12" fill="url(#bench)"/>
+          <line x1="0" x2="420" y1="198" y2="198" stroke="#64748b" stroke-opacity=".35"/>
+          <g id="lock">
+            <rect x="244" y="64" width="170" height="132" rx="14" fill="#1b2a47" stroke="#2f4470" stroke-width="2"/>
+            <rect x="246" y="146" width="168" height="40" fill="#050a14"/>
+            <circle cx="253" cy="191" r="2.5" fill="#475f8c"/><circle cx="407" cy="191" r="2.5" fill="#475f8c"/>
+            <line id="shear" x1="250" x2="410" y1="130" y2="130" stroke="#2dd4bf" stroke-opacity=".4" stroke-dasharray="3 4"/>
+            <g id="pins"></g>
+          </g>
+          <g id="key"><g id="kt">
+            <rect x="58" y="143" width="12" height="37" rx="2" fill="url(#gs)"/>
+            <rect x="8" y="133" width="56" height="60" rx="20" fill="url(#gs)"/>
+            <circle cx="23" cy="163" r="6" fill="#070d1a"/>
+            <circle cx="45" cy="163" r="14" fill="#14b8a6"/>
+            <text id="letter" x="45" y="170" text-anchor="middle" font-size="19" font-weight="800" fill="#04201c" font-family="Inter,sans-serif">c</text>
+            <path id="blade" fill="url(#gs)"/>
+            <text x="140" y="175" font-size="5.5" letter-spacing="1.5" fill="#475569" text-anchor="middle" font-family="Inter,sans-serif">CHABI · PRIVATE KEY</text>
+          </g></g>
+          <rect x="228" y="60" width="9" height="140" rx="3" fill="#2dd4bf"/>
+          <!-- hammer + chisel: origin = chisel tip -->
+          <g id="ham" style="opacity:0" transform="translate(80 96)">
+            <polygon points="-4,-12 4,-12 0,0" fill="url(#gs)"/>
+            <rect x="-6" y="-16" width="12" height="5" rx="1.5" fill="#94a3b8"/>
+            <rect x="-15" y="-34" width="30" height="19" rx="3.5" fill="#334155" stroke="#64748b"/>
+            <rect x="-15" y="-34" width="30" height="4.5" rx="2" fill="#475569"/>
+            <rect x="-3.5" y="-76" width="7" height="43" rx="3" fill="#64748b"/>
+            <rect x="-4.5" y="-76" width="9" height="20" rx="4" fill="#0f766e"/>
+          </g>
+          <g id="fx"></g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <form id="fm" novalidate>
+      <h2>Welcome</h2>
+      <p class="sub">Sign in to continue.</p>
+      <label class="f"><span>Email</span>
+        <input id="em" type="email" inputmode="email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="you@example.com"></label>
+      <label class="f"><span>Password</span>
+        <div class="box"><input id="pwd" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="••••••••">
+          <button type="button" class="eye" id="eye" aria-label="Show password">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </label>
+      <div class="row"><label class="chk"><input type="checkbox" checked>Keep me signed in</label><a href="#">Forgot?</a></div>
+      <button class="btn" id="go" type="submit">Sign in</button>
+      <p class="msg" id="msg" hidden>Wrong password. The key went in, but the lock didn’t open.</p>
+      <p class="new">No account yet? <a href="#">Create one</a></p>
+      <p class="hint">Demo: any email &amp; password <b>sumanerkey</b></p>
+    </form>
+
+    <div id="ok" hidden>
+      <h2>You’re in.</h2>
+      <p class="sub" id="who"></p>
+      <button class="btn" type="button">Continue</button>
+      <button class="out" id="out" type="button">Sign out</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const PW = 'sumanerkey', NS = 'http://www.w3.org/2000/svg', $ = id => document.getElementById(id);
+const sv = $('sv'), pins = $('pins'), blade = $('blade'), key = $('key'), kt = $('kt'), fx = $('fx'), ham = $('ham'),
+      shear = $('shear'), lock = $('lock'), em = $('em'), pwd = $('pwd'), btn = $('go'), letter = $('letter'),
+      msg = $('msg'), cap = $('cap');
+const mk = (tag, a = {}) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+/* ---- headline captions ---- */
+const CAP = {
+  idle:  'Your password <br>is the <em>key</em>.',
+  stamp: 'Your email leaves <br>its <em>mark</em>.',
+  cut:   'Every keystroke <br>strikes a <em>notch</em>.',
+  fix:   'Change a letter. <br>A new notch is <em>struck</em>.',
+  busy:  'Now the key <br>meets the <em>lock</em>.',
+  wrong: 'Wrong password? <br>The pins <em>refuse</em>.',
+  turn:  'Every pin lines up. <br>The lock <em>opens</em>.',
+  in:    'Welcome. <br>You are <em>in</em>.'
+};
+let capKey = 'idle';
+function setCap(k) {
+  if (k === capKey) return; capKey = k;
+  cap.innerHTML = CAP[k]; cap.classList.remove('swap'); void cap.offsetWidth; cap.classList.add('swap');
+}
+
+/* ---- bitting: each character -> a notch depth ---- */
+const codeAt = (s, i) => i === 7 ? [...s.slice(7)].reduce((a, c) => a + c.charCodeAt(0), 0) : s.charCodeAt(i);
+const depth = c => .1 + ((c * 7) % 9) / 10;
+const raw = s => Array.from({ length: 8 }, (_, i) => i >= s.length ? 0 : depth(codeAt(s, i)));
+const REF = raw(PW);
+function cutsFor(s) {
+  const c = raw(s);
+  if (s !== PW) {                       // a wrong password must never line up by coincidence
+    for (let j = 0; j < 8; j++) {
+      if (codeAt(s, j) !== codeAt(PW, j)) {
+        if (Math.abs(c[j] - REF[j]) < .01) c[j] = REF[j] > .5 ? REF[j] - .3 : REF[j] + .3;
+        break;
+      }
+    }
+  }
+  return c;
+}
+
+/* ---- pins are built once ---- */
+const spring = (x, y2) => { let d = `M${x} 78`; const h = (y2 - 78) / 6; for (let k = 0; k < 6; k++) d += ` L${x + (k % 2 ? -5 : 5)} ${78 + h * (k + .5)}`; return d + ` L${x} ${y2}`; };
+const P = [];
+for (let i = 0; i < 8; i++) {
+  const x = 258 + 17 * i, L = 20 + REF[i] * 18, yk = 150 - L, yd = yk - 16;
+  const sp = mk('path', { fill: 'none', stroke: '#64748b', 'stroke-width': 1.3 }), g = mk('g');
+  const dr = mk('rect', { x: x - 4, y: yd, width: 8, height: 16, rx: 1.5, fill: '#94a3b8' });
+  const kp = mk('path', { d: `M${x - 3.5} ${yk} H${x + 3.5} V144 L${x} 150 L${x - 3.5} 144Z`, fill: 'url(#gs)' });
+  g.append(dr, kp); pins.append(sp, g); P.push({ x, yd, sp, g, dr });
+}
+
+/* ---- state + one animation loop ---- */
+let view = Array(8).fill(0), tgt = Array(8).fill(0), planned = Array(8).fill(0),
+    dx = 0, ky = 0, mv = null, raf = 0, camT;
+const st = { phase: 'idle', eval: false, bad: [], wasWrong: false };
+const H = { x: 80, y: 96, r: -10, q: [], segs: [], from: [0, 0, 0], t0: 0, hidden: true, hideT: 0 };
+
+const bladePath = v => {
+  let d = 'M62 150';
+  for (let i = 0; i < 8; i++) { const cx = 80 + 17 * i, h = v[i] * 18; d += ` L${cx - 8} 150 L${cx} ${150 + h} L${cx + 8} 150`; }
+  return d + ' L208 150 L218 158 L218 180 L62 180Z';
+};
+const profile = xl => {                 // height of the key's top edge: pins ride it as the key slides in
+  if (xl < 62 || xl > 218) return 150;
+  if (xl > 208) return 150 + (xl - 208) * .8;
+  for (let i = 0; i < 8; i++) { const d = Math.abs(xl - (80 + 17 * i)); if (d < 8) return 150 + view[i] * 18 * (1 - d / 8); }
+  return 150;
+};
+function updatePins() {
+  for (const p of P) {
+    const o = profile(p.x - dx) - 150;
+    p.g.setAttribute('transform', `translate(0 ${o.toFixed(2)})`);
+    p.sp.setAttribute('d', spring(p.x, p.yd + o));
+  }
+}
+function paintPins() {
+  P.forEach((p, i) => p.dr.setAttribute('fill', st.eval ? (st.bad[i] ? '#f87171' : '#4ade80') : '#94a3b8'));
+}
+
+/* hammer: move -> wind-up -> strike (chisel digs the notch) -> recoil */
+function planHit(job, now) {
+  clearTimeout(H.hideT);
+  const tx = 80 + 17 * job.i, T = 150 + job.d * 18, s = H.q.length > 1 ? .55 : 1;
+  if (H.hidden) { H.x = tx; H.y = 96; H.r = 0; H.hidden = false; ham.style.opacity = 1; }
+  H.from = [H.x, H.y, H.r]; H.t0 = now;
+  H.segs = [
+    { d: Math.max(40, Math.min(140, Math.abs(tx - H.x) * 2)) * s, to: [tx, 122, 0] },
+    { d: 55 * s, to: [tx, 108, 0] },
+    { d: 50 * s, to: [tx, T, 0], ease: 'in', hit: job },
+    { d: 110 * s, to: [tx, 122, 0], ease: 'out' }
+  ];
+}
+function impact(job) { tgt[job.i] = job.d; ky = 2.6; sparks(job.i); }
+function hamTick(now) {
+  if (!H.segs.length) {
+    if (!H.q.length) return false;
+    if (dx > 2 || mv) return true;       // wait until the key has slid back out
+    planHit(H.q.shift(), now);
+  }
+  const sg = H.segs[0], p = Math.min(1, (now - H.t0) / sg.d);
+  const e = sg.ease === 'in' ? p * p : sg.ease === 'out' ? 1 - (1 - p) * (1 - p) : .5 - .5 * Math.cos(Math.PI * p);
+  H.x = H.from[0] + (sg.to[0] - H.from[0]) * e; H.y = H.from[1] + (sg.to[1] - H.from[1]) * e; H.r = H.from[2] + (sg.to[2] - H.from[2]) * e;
+  ham.setAttribute('transform', `translate(${H.x.toFixed(1)} ${H.y.toFixed(1)}) rotate(${H.r.toFixed(1)})`);
+  if (p >= 1) {
+    if (sg.hit) impact(sg.hit);
+    H.from = sg.to.slice(); H.t0 = now; H.segs.shift();
+    if (!H.segs.length && !H.q.length) { clearTimeout(H.hideT); H.hideT = setTimeout(() => { ham.style.opacity = 0; H.hidden = true; }, 1100); }
+  }
+  return true;
+}
+
+function tick(now) {
+  let busy = false, vch = false, dch = false;
+  for (let i = 0; i < 8; i++) {
+    const d = tgt[i] - view[i];
+    if (Math.abs(d) > .003) { view[i] += d * .35; busy = vch = true; } else if (view[i] !== tgt[i]) { view[i] = tgt[i]; vch = true; }
+  }
+  if (mv) {
+    const p = Math.min(1, (now - mv.t0) / mv.dur);
+    dx = mv.from + (mv.to - mv.from) * (mv.out ? 1 - (1 - p) * (1 - p) : .5 - .5 * Math.cos(Math.PI * p)); dch = true;
+    if (p >= 1) { dx = mv.to; mv = null; } else busy = true;
+  }
+  if (ky > .05) { ky *= .7; dch = busy = true; } else if (ky) { ky = 0; dch = true; }
+  if (hamTick(now)) busy = true;
+  if (partTick(now)) busy = true;
+  if (vch) blade.setAttribute('d', bladePath(view));
+  if (dch) key.setAttribute('transform', `translate(${dx.toFixed(2)} ${ky.toFixed(2)})`);
+  if (vch || dch) updatePins();
+  raf = busy ? requestAnimationFrame(tick) : 0;
+}
+const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+const moveKey = (to, dur, out) => { mv = { from: dx, to, dur, out, t0: performance.now() }; kick(); };
+
+/* ---- helpers ---- */
+function setCam(m, hold) {
+  sv.dataset.cam = m; clearTimeout(camT);
+  if (hold) camT = setTimeout(() => { if (st.phase !== 'busy' && st.phase !== 'done') sv.dataset.cam = 'idle'; }, hold);
+}
+/* flying iron: steel chips arc out and fall, hot sparks streak away */
+const POOL = [];
+for (let k = 0; k < 70; k++) {
+  const chip = k < 40;
+  const e = chip ? mk('polygon', { points: '0,-2.4 2.6,1.8 -2.2,1.4', fill: ['#cbd5e1', '#94a3b8', '#64748b'][k % 3] })
+                 : mk('rect', { x: -3, y: -.5, width: 6, height: 1, rx: .5, fill: ['#fde68a', '#fb923c', '#fbbf24'][k % 3] });
+  e.setAttribute('display', 'none'); fx.appendChild(e);
+  POOL.push({ e, chip, on: false, x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, life: 0, max: 1 });
+}
+function spawn(chip, x, y, sp, life) {
+  const p = POOL.find(q => q.chip === chip && !q.on); if (!p) return;
+  const a = -Math.PI / 2 + (Math.random() - .5) * 2.3;
+  p.x = x; p.y = y; p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp;
+  p.r = Math.random() * 360; p.vr = (Math.random() - .5) * 900;
+  p.life = p.max = life; p.on = true; p.e.removeAttribute('display');
+}
+function sparks(i) {
+  const x = 80 + 17 * i;
+  for (let k = 0; k < 6; k++) spawn(true, x + (Math.random() - .5) * 6, 150, 110 + Math.random() * 150, .9 + Math.random() * .4);
+  for (let k = 0; k < 8; k++) spawn(false, x, 149, 170 + Math.random() * 210, .3 + Math.random() * .25);
+  kick();
+}
+let lastT = 0;
+function partTick(now) {
+  const dt = Math.min(.05, (now - (lastT || now)) / 1000); lastT = now; let any = false;
+  for (const p of POOL) {
+    if (!p.on) continue;
+    p.life -= dt;
+    if (p.life <= 0) { p.on = false; p.e.setAttribute('display', 'none'); continue; }
+    any = true;
+    if (p.chip) {
+      p.vy += 700 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (p.y > 195 && p.vy > 0) { p.y = 195; p.vy *= -.3; p.vx *= .6; p.vr *= .5; }
+      p.e.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.r.toFixed(0)})`);
+      p.e.setAttribute('opacity', Math.min(1, p.life / .25).toFixed(2));
+    } else {
+      p.vy += 500 * dt; p.vx *= .98; p.x += p.vx * dt; p.y += p.vy * dt;
+      const a = Math.atan2(p.vy, p.vx) * 57.3, k = p.life / p.max;
+      p.e.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${a.toFixed(0)}) scale(${(.4 + k).toFixed(2)} 1)`);
+      p.e.setAttribute('opacity', k.toFixed(2));
+    }
+  }
+  if (!any) lastT = 0;
+  return any;
+}
+function retract() {
+  st.eval = false; st.bad = []; st.phase = 'typing'; paintPins();
+  shear.classList.remove('on'); kt.classList.remove('lay', 'try'); msg.hidden = true;
+  moveKey(0, 600);                       // key slides back out slowly
+}
+
+/* ---- inputs ---- */
+[em, pwd].forEach(el => el.addEventListener('input', () => el.closest('.f').classList.remove('err')));
+
+em.addEventListener('input', () => {
+  if (st.phase === 'wrong') retract();
+  if (st.phase === 'idle') st.phase = 'typing';
+  const c = em.value.trim()[0];
+  letter.textContent = c && /[\p{L}\p{N}]/u.test(c) ? c.toUpperCase() : 'c';
+  setCap('stamp'); setCam('stamp', 1600);
+});
+
+pwd.addEventListener('input', () => {
+  if (st.phase === 'wrong') retract();
+  if (st.phase === 'idle') st.phase = 'typing';
+  const want = cutsFor(pwd.value);
+  for (let i = 0; i < 8; i++) {
+    if (Math.abs(want[i] - planned[i]) < .001) continue;
+    H.q = H.q.filter(j => j.i !== i);               // a newer cut replaces a queued one
+    if (want[i] === 0) tgt[i] = 0; else H.q.push({ i, d: want[i] });   // erased letter: just un-cut
+    planned[i] = want[i];
+  }
+  H.q.sort((a, b) => a.i - b.i);
+  setCap(st.wasWrong ? 'fix' : 'cut'); setCam('cut', 2200); kick();
+});
+
+$('eye').onclick = () => { pwd.type = pwd.type === 'password' ? 'text' : 'password'; };
+
+/* ---- submit: wait for the hammer, then the key slides in slowly ---- */
+$('fm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (st.phase === 'busy' || st.phase === 'done') return;
+  const bad = !/.+@.+/.test(em.value) ? em : !pwd.value ? pwd : null;
+  if (bad) { const f = bad.closest('.f'); f.classList.remove('err'); void f.offsetWidth; f.classList.add('err'); bad.focus(); return; }
+  if (st.phase === 'wrong') retract();
+  document.activeElement && document.activeElement.blur();      // close the phone keyboard
+  st.phase = 'busy'; em.readOnly = pwd.readOnly = true; btn.disabled = true; btn.textContent = 'Trying the key…';
+  const go = () => {
+    clearTimeout(H.hideT); ham.style.opacity = 0; H.hidden = true;
+    setCap('busy'); setCam('lock'); moveKey(178, 1300, true);
+    setTimeout(() => pwd.value === PW ? unlock() : wrong(), 1500);
+  };
+  const wait = () => (H.q.length || H.segs.length || dx > 2 || mv) ? setTimeout(wait, 60) : setTimeout(go, 120);
+  wait();
+});
+
+/* wrong password: key goes fully in, pins don't line up, key tries to turn but can't */
+function wrong() {
+  st.phase = 'wrong'; st.wasWrong = true; st.eval = true;
+  st.bad = cutsFor(pwd.value).map((c, i) => Math.abs(c - REF[i]) > .01); paintPins();
+  setCap('wrong');
+  kt.classList.remove('try'); void kt.getBoundingClientRect(); kt.classList.add('try');
+  lock.classList.remove('shake'); void lock.getBoundingClientRect(); lock.classList.add('shake');
+  em.readOnly = pwd.readOnly = false; msg.hidden = false; btn.disabled = false; btn.textContent = 'Sign in';
+}
+
+/* right password: pins line up, key turns 90° and lies flat on its side, lock opens */
+function unlock() {
+  st.eval = true; st.bad = []; paintPins();
+  setCap('turn'); shear.classList.add('on');
+  setTimeout(() => kt.classList.add('lay'), 250);
+  setTimeout(() => setCap('in'), 1300);
+  setTimeout(() => {
+    st.phase = 'done'; setCam('idle');
+    $('fm').hidden = true; $('ok').hidden = false;
+    $('who').textContent = 'Signed in as ' + em.value.trim() + '.';
+  }, 2000);
+}
+
+$('out').onclick = () => {
+  Object.assign(st, { phase: 'idle', eval: false, bad: [], wasWrong: false }); paintPins();
+  kt.classList.remove('lay', 'try'); shear.classList.remove('on'); moveKey(0, 700);
+  pwd.value = ''; tgt = Array(8).fill(0); planned = Array(8).fill(0); H.q = []; H.segs = [];
+  msg.hidden = true; em.readOnly = pwd.readOnly = false;
+  setCap('idle'); setCam('idle');
+  $('ok').hidden = true; $('fm').hidden = false; btn.disabled = false; btn.textContent = 'Sign in'; kick();
+};
+
+document.addEventListener('click', e => { if (e.target.closest('a[href="#"]')) e.preventDefault(); });
+blade.setAttribute('d', bladePath(view)); updatePins();
+</script>
+</body>
+</html>
