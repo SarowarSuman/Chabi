@@ -28,7 +28,8 @@ body{min-height:100dvh;display:grid;place-items:start center;font-family:Inter,s
  padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));overflow-x:hidden}
 .wrap{display:flex;flex-direction:column;gap:16px;width:min(100%,460px)}
 .left{display:contents}
-.live{position:sticky;top:0;z-index:10;background:#070c17;padding:6px 0 10px;box-shadow:0 12px 16px -10px #070c17}
+.live{position:sticky;top:0;z-index:10;padding:6px 0 10px}
+.live.stuck{background:#070c17;box-shadow:0 12px 16px -10px #070c17}
 .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:16px}
 .brand i{color:var(--acc);font-style:normal}
 #cap{font-size:clamp(26px,6vw,34px);line-height:1.06;letter-spacing:-.035em;font-weight:800;margin-bottom:12px;min-height:2.12em}
@@ -81,7 +82,7 @@ a{color:var(--acc);font-weight:600;text-decoration:none;padding:8px 0;display:in
   .wrap{display:flex;flex-direction:column;gap:14px}
   .left{display:contents}
   .brand{margin-bottom:0;font-size:20px}
-  .live{position:sticky;top:0;z-index:10;background:#070c17;padding:6px 0 10px;box-shadow:0 12px 16px -10px #070c17}
+  
   #cap{font-size:20px;min-height:2.5em;margin-bottom:8px;letter-spacing:-.02em}
   #cap br{display:none}
   .card{padding:22px 18px}
@@ -456,6 +457,10 @@ $('out').onclick = () => {
 };
 
 document.addEventListener('click', e => { if (e.target.closest('a[href="#"]')) e.preventDefault(); });
+/* caption + stage pin to the top while scrolling; solid backing only once pinned */
+const live = document.querySelector('.live');
+const stuck = () => live.classList.toggle('stuck', live.getBoundingClientRect().top <= 1);
+addEventListener('scroll', stuck, { passive: true }); stuck();
 blade.setAttribute('d', bladePath(view)); updatePins();
 </script>
 </body>
